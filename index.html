@@ -4,42 +4,898 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Halloween Challenge</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <style>
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Georgia,serif;color:#fff;background:radial-gradient(circle at 50% 30%,#57200f 0,#17101a 38%,#07050a 80%)}body{overflow:hidden}.fog{position:fixed;inset:-20%;opacity:.2;pointer-events:none;background:radial-gradient(ellipse,#ddd0 0,#ddd8 22%,transparent 50%);filter:blur(35px);animation:fog 9s ease-in-out infinite alternate}@keyframes fog{to{transform:translateX(35px) scale(1.06)}}.app{width:min(430px,100vw);height:100vh;margin:auto;padding:14px 16px 20px;display:flex;flex-direction:column;position:relative}.header{text-align:center;font-size:20px;font-weight:bold;padding:5px;text-shadow:0 2px 10px #000}.sub{font-size:12px;color:#cdb5ca;font-weight:normal;margin-top:2px}.scene{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}.frame{width:min(350px,88vw);height:min(590px,70vh);position:relative;perspective:1200px}.wall{position:absolute;inset:0;border-radius:18px;background:linear-gradient(145deg,#24171b,#0d090e);box-shadow:0 22px 65px #000}.doorway{position:absolute;inset:12px;border-radius:10px;overflow:hidden;background:radial-gradient(circle at 50% 43%,#ffb452,#651f10 25%,#080609 65%);box-shadow:inset 0 0 50px #000}.glow{position:absolute;z-index:1;inset:15% 8% 0;background:#ff8a2a;filter:blur(48px);opacity:.32}.admin{position:absolute;z-index:3;left:50%;bottom:-2%;width:105%;height:98%;transform:translate(-50%,58%) scale(.78);opacity:0;transition:transform 1.05s cubic-bezier(.2,.85,.2,1),opacity .55s;display:flex;align-items:flex-end;justify-content:center}.admin.show{transform:translate(-50%,0) scale(1);opacity:1}.admin img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 0 26px #ff8b2d99)}.door{position:absolute;z-index:5;inset:0;transform-origin:left center;background:repeating-linear-gradient(90deg,transparent 0 48px,#120e12 49px 54px),linear-gradient(90deg,#3a2327,#613b34 50%,#29181d);border:5px solid #171015;box-shadow:inset 0 0 40px #000;transition:transform 1.35s cubic-bezier(.72,0,.2,1),filter .3s}.door:before{content:"";position:absolute;inset:28px;border:2px solid #28161b;box-shadow:inset 0 0 30px #000}.door:after{content:"🎃";position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:65px;filter:drop-shadow(0 0 12px #ff761b)}.door.open{transform:rotateY(-110deg);filter:brightness(.68)}.knob{position:absolute;right:27px;top:52%;width:20px;height:20px;border-radius:50%;background:#d29c4a;box-shadow:0 2px 9px #000}.spider{position:absolute;z-index:10;font-size:30px;animation:swing 3s ease-in-out infinite}.s1{left:-8px;top:3%}.s2{right:-8px;bottom:6%}@keyframes swing{50%{transform:translateY(11px) rotate(5deg)}}.tap{border:0;border-radius:999px;padding:16px 30px;background:linear-gradient(135deg,#ff9820,#c14b1d);color:#fff;font:bold 18px Georgia;box-shadow:0 8px 28px #0009,0 0 22px #ff7b2444;cursor:pointer}.tap:disabled{opacity:.55}.status{height:30px;text-align:center;color:#dec5c7;font-size:14px;padding-top:9px}.shake{animation:shake .55s}@keyframes shake{20%{transform:translateX(-7px) rotate(-1deg)}40%{transform:translateX(7px) rotate(1deg)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}.card{position:absolute;z-index:20;left:50%;bottom:68px;width:min(390px,90vw);transform:translate(-50%,38px);opacity:0;pointer-events:none;background:#120b15ee;border:1px solid #b27b56;border-radius:20px;padding:19px;box-shadow:0 18px 60px #000;backdrop-filter:blur(10px);transition:.65s}.card.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}.card h2{margin:0 0 12px;text-align:center;font-size:22px}.task{background:#f1dfbe;color:#281a1b;border-radius:12px;padding:17px;line-height:1.45;font-size:16px}.reset{display:block;margin:14px auto 0;border:1px solid #875b6e;background:#29172f;color:#fff;border-radius:999px;padding:9px 20px}
+*{box-sizing:border-box}
+
+html,body{
+    margin:0;
+    min-height:100%;
+    font-family:Georgia,serif;
+    color:#fff;
+    background:
+        radial-gradient(circle at 50% 30%,#57200f 0,#17101a 38%,#07050a 80%)
+}
+
+body{
+    overflow:hidden
+}
+
+.fog{
+    position:fixed;
+    inset:-20%;
+    opacity:.2;
+    pointer-events:none;
+    background:
+        radial-gradient(ellipse,#ddd0 0,#ddd8 22%,transparent 50%);
+    filter:blur(35px);
+    animation:fog 9s ease-in-out infinite alternate
+}
+
+@keyframes fog{
+    to{
+        transform:translateX(35px) scale(1.06)
+    }
+}
+
+.app{
+    width:min(430px,100vw);
+    height:100vh;
+    margin:auto;
+    padding:14px 16px 20px;
+    display:flex;
+    flex-direction:column;
+    position:relative
+}
+
+.header{
+    text-align:center;
+    font-size:20px;
+    font-weight:bold;
+    padding:5px;
+    text-shadow:0 2px 10px #000
+}
+
+.sub{
+    font-size:12px;
+    color:#cdb5ca;
+    font-weight:normal;
+    margin-top:2px
+}
+
+.scene{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:0
+}
+
+.frame{
+    width:min(350px,88vw);
+    height:min(590px,70vh);
+    position:relative;
+    perspective:1200px
+}
+
+.wall{
+    position:absolute;
+    inset:0;
+    border-radius:18px;
+    background:linear-gradient(145deg,#24171b,#0d090e);
+    box-shadow:0 22px 65px #000
+}
+
+.doorway{
+    position:absolute;
+    inset:12px;
+    border-radius:10px;
+    overflow:hidden;
+    background:
+        radial-gradient(circle at 50% 43%,#ffb452,#651f10 25%,#080609 65%);
+    box-shadow:inset 0 0 50px #000
+}
+
+.glow{
+    position:absolute;
+    z-index:1;
+    inset:15% 8% 0;
+    background:#ff8a2a;
+    filter:blur(48px);
+    opacity:.32
+}
+
+.admin{
+    position:absolute;
+    z-index:3;
+    left:50%;
+    bottom:-2%;
+    width:105%;
+    height:98%;
+    transform:translate(-50%,58%) scale(.78);
+    opacity:0;
+    transition:
+        transform 1.05s cubic-bezier(.2,.85,.2,1),
+        opacity .55s;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center
+}
+
+.admin.show{
+    transform:translate(-50%,0) scale(1);
+    opacity:1
+}
+
+.admin img{
+    max-width:100%;
+    max-height:100%;
+    width:auto;
+    height:auto;
+    object-fit:contain;
+    filter:drop-shadow(0 0 26px #ff8b2d99)
+}
+
+.door{
+    position:absolute;
+    z-index:5;
+    inset:0;
+    transform-origin:left center;
+    background:
+        repeating-linear-gradient(
+            90deg,
+            transparent 0 48px,
+            #120e12 49px 54px
+        ),
+        linear-gradient(
+            90deg,
+            #3a2327,
+            #613b34 50%,
+            #29181d
+        );
+    border:5px solid #171015;
+    box-shadow:inset 0 0 40px #000;
+    transition:
+        transform 1.35s cubic-bezier(.72,0,.2,1),
+        filter .3s
+}
+
+.door:before{
+    content:"";
+    position:absolute;
+    inset:28px;
+    border:2px solid #28161b;
+    box-shadow:inset 0 0 30px #000
+}
+
+.door:after{
+    content:"🎃";
+    position:absolute;
+    left:50%;
+    top:42%;
+    transform:translate(-50%,-50%);
+    font-size:65px;
+    filter:drop-shadow(0 0 12px #ff761b)
+}
+
+.door.open{
+    transform:rotateY(-110deg);
+    filter:brightness(.68)
+}
+
+.knob{
+    position:absolute;
+    right:27px;
+    top:52%;
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    background:#d29c4a;
+    box-shadow:0 2px 9px #000
+}
+
+.spider{
+    position:absolute;
+    z-index:10;
+    font-size:30px;
+    animation:swing 3s ease-in-out infinite
+}
+
+.s1{
+    left:-8px;
+    top:3%
+}
+
+.s2{
+    right:-8px;
+    bottom:6%
+}
+
+@keyframes swing{
+    50%{
+        transform:translateY(11px) rotate(5deg)
+    }
+}
+
+.tap{
+    border:0;
+    border-radius:999px;
+    padding:16px 30px;
+    background:linear-gradient(135deg,#ff9820,#c14b1d);
+    color:#fff;
+    font:bold 18px Georgia;
+    box-shadow:
+        0 8px 28px #0009,
+        0 0 22px #ff7b2444;
+    cursor:pointer
+}
+
+.tap:disabled{
+    opacity:.55;
+    cursor:default
+}
+
+.status{
+    height:30px;
+    text-align:center;
+    color:#dec5c7;
+    font-size:14px;
+    padding-top:9px
+}
+
+.shake{
+    animation:shake .55s
+}
+
+@keyframes shake{
+    20%{
+        transform:translateX(-7px) rotate(-1deg)
+    }
+
+    40%{
+        transform:translateX(7px) rotate(1deg)
+    }
+
+    60%{
+        transform:translateX(-5px)
+    }
+
+    80%{
+        transform:translateX(4px)
+    }
+}
+
+/* =========================
+   NAME
+========================= */
+
+.nameBadge{
+    position:absolute;
+    z-index:30;
+    top:18px;
+    left:50%;
+    transform:translate(-50%,-20px);
+    opacity:0;
+    padding:9px 18px;
+    border-radius:999px;
+    background:#160c16ee;
+    border:1px solid #c4875d;
+    box-shadow:0 8px 30px #000;
+    white-space:nowrap;
+    font-size:20px;
+    font-weight:bold;
+    text-shadow:0 2px 5px #000;
+    transition:
+        opacity .7s,
+        transform 1.2s cubic-bezier(.2,.8,.2,1)
+}
+
+.nameBadge.show{
+    opacity:1;
+    transform:translate(-50%,-5px)
+}
+
+.nameBadge.float{
+    transform:translate(-50%,-42px) scale(.92);
+    opacity:.92
+}
+
+/* =========================
+   CARD
+========================= */
+
+.card{
+    position:absolute;
+    z-index:40;
+    left:50%;
+    bottom:68px;
+    width:min(390px,90vw);
+    transform:translate(-50%,38px);
+    opacity:0;
+    pointer-events:none;
+    background:#120b15ee;
+    border:1px solid #b27b56;
+    border-radius:20px;
+    padding:19px;
+    box-shadow:0 18px 60px #000;
+    backdrop-filter:blur(10px);
+    transition:.65s
+}
+
+.card.show{
+    opacity:1;
+    transform:translate(-50%,0);
+    pointer-events:auto
+}
+
+.card h2{
+    margin:0 0 10px;
+    text-align:center;
+    font-size:21px
+}
+
+.progress{
+    text-align:center;
+    color:#cfae9f;
+    font-size:13px;
+    margin-bottom:10px
+}
+
+.task{
+    background:#f1dfbe;
+    color:#281a1b;
+    border-radius:12px;
+    padding:17px;
+    line-height:1.45;
+    font-size:16px
+}
+
+.complete{
+    display:block;
+    width:100%;
+    margin-top:14px;
+    border:0;
+    border-radius:999px;
+    padding:13px 18px;
+    background:linear-gradient(135deg,#ff9820,#c14b1d);
+    color:#fff;
+    font:bold 16px Georgia;
+    cursor:pointer;
+    box-shadow:0 6px 20px #0008
+}
+
+.complete:disabled{
+    opacity:.55
+}
+
+.closeBtn{
+    display:block;
+    margin:10px auto 0;
+    border:1px solid #875b6e;
+    background:#29172f;
+    color:#fff;
+    border-radius:999px;
+    padding:8px 18px
+}
+
+.finish{
+    text-align:center;
+    padding:10px
+}
+
+.finishEmoji{
+    font-size:45px;
+    margin-bottom:8px
+}
+
+.finishTitle{
+    font-size:21px;
+    font-weight:bold;
+    margin-bottom:6px
+}
+
+.finishText{
+    color:#d9c3c9;
+    font-size:14px;
+    line-height:1.4
+}
 </style>
 </head>
-<body>
-<div class="fog"></div><main class="app">
-<div class="header">🎃 Halloween Challenge<div class="sub">mini app</div></div>
-<div class="scene"><div class="frame"><div class="wall"></div><div class="doorway"><div class="glow"></div><div class="admin" id="admin"><img id="adminPhoto" alt="Фото адміна"></div><div class="door" id="door"><div class="knob"></div></div></div><div class="spider s1">🕷️</div><div class="spider s2">🕸️</div></div></div>
-<button class="tap" id="tap">👊 ПОСТУКАТИ</button><div class="status" id="status">Наважишся?</div></main>
-<div class="card" id="card"><h2 id="who"></h2><div class="task" id="task"></div><button class="reset" onclick="location.reload()">Закрити</button></div>
-<script>
-/* Фото замінюються БЕЗ зміни цього index.html.
-   Просто поклади потрібні файли у /admin-photos/ з цими назвами. */
-const admins=[
-{id:'marina-m',name:'Марина М.',photo:'admin-photos/marina-m.png',tasks:['🕯️ Намалювати сторінку 13 або 31.','🍁 Змінити літній/зимовий фон на осінній. Зміни кольорів достатньо.','🐺 Намалювати тварину-хижака.','🌊 Summertime sadness: згадати літо та намалювати пляж/море.','👹 Намалювати незвичну істоту.']},
-{id:'natasha-s',name:'Наташа С.',photo:'admin-photos/natasha-s.png',tasks:['🦇🕷️ Розмалюй картинку з тваринкою-символом Геловіну — павуком чи кажаном.','🧣 Розмалюй картинку з героєм, який має будь-який осінній аксесуар або елемент одягу: шарф, капелюх, рукавички, пальто або парасольку.','🌧️ Розмалюй картинку з похмурою погодою (дощ, похмуре небо).','🍁 Розмалюй картинку, де є помаранчеве листя.','📚 Розмалюй картинку, де є книга, як символ осіннього затишного вечора.']},
-{id:'natasha-m',name:'Наташа М.',photo:'admin-photos/natasha-m.png',tasks:['🌕 Під місяцем — знайди картинку, де є місяць, нічне небо або персонаж, який асоціюється з ніччю.','☕ Смак осені — картинка, що передає аромат гарячого напою, випічки з корицею чи осіннього врожаю.','🛤️ Стежка крізь осінь — будь-яка картинка з алеєю, лісовою стежкою чи дорогою, вкритою золотим листям.','🧺 Дари осені — картинка, де є свіжий врожай, яблука, стиглий виноград, горіхи чи кошик із грибами.','🌧️ За вікном дощить — знайди картинку, де видно краплі дощу на склі, парасолі чи затишні вогні вечірнього міста.']},
-{id:'svitlana',name:'Світлана',photo:'admin-photos/svitlana.png',tasks:['🎨 Палітра золота — картинка, де переважають глибокі осінні кольори: багряний, помаранчевий, охра та теплий коричневий.','🎨 Арт з гарбузами — знайди картинку, де гарбузи є естетичним елементом осіннього натюрморту чи затишного декору.','🍄 Світ моху та грибів — знайди картинку з казковими грибами, вкритим мохом пеньком або лісовими деталями.','🪟 Осінній вид з вікна — ілюстрація, де крізь шибку видно барвистий ліс, туман або міський парк.','🦊 Рудий хвіст — картинка, де головним героєм є лисиця або інша тварина з яскраво-оранжевим хутром.']},
-{id:'marina-a',name:'Марина А.',photo:'admin-photos/marina-a.png',tasks:['👻 Жахіття — знайди у своїх розмальовках найстрашнішу картинку! Звісно, на твою суб’єктивну думку. Можливо, ти давно обходив/ла її стороною… Але сьогодні настав її час. Наважишся?','🐈‍⬛ Супутник — знайди картинку, де є кіт. А якщо пощастить — саме чорний кіт! Адже який же Геловін без пухнастого супутника, який неодмінно знає щось про магію, таємниці й потойбіччя?','☕ Затишок — знайди картинку, яка асоціюється у тебе із затишком. Можливо, це горнятко теплого чаю чи какао або теплий светр чи плед.','🍎 Осінній врожай — знайди картинку, де є яблука, груші або інші фрукти. Сьогодні розфарбовуємо щось із осіннього врожаю.','🦊 Лісовий мешканець — знайди картинку, де є лисиця, білочка, ведмідь або будь-який інший мешканець осіннього лісу.']},
-{id:'vlad',name:'Влад',photo:'admin-photos/vlad.png',tasks:['🧙 Розмалювати сторінку з відьмою/феєю/чарівником.','🕯️ Розмалювати картинку, на якій є свічка або ліхтар.','🍂 Розмалювати сцену, де персонаж тримає листок або листя летить навколо.','🥧 Розмалювати картинку з пирогом, тістечком або іншою осінньою випічкою.','☕ Розмалювати картинку з чашкою, кухлем або чайником.']},
-{id:'vika',name:'Віка',photo:'admin-photos/vika.png',tasks:['🎃 Намалюйте персонажа у вбранні, яке пасуватиме для святкування Геловіну.','🍬 Намалюйте солодощі, якими можна пригостити дітей, що завітали на Геловін.','🕯️ Намалюйте предмети або прикраси, які могли б створити геловінську атмосферу.','🖤🧡💜 Намалюйте картинку, використовуючи чорний, помаранчевий та фіолетовий.','💛🤎🧡 Намалюйте картинку, використовуючи жовтий, коричневий та помаранчевий.']},
-{id:'alina',name:'Аліна',photo:'admin-photos/alina.png',tasks:['🕯️ Проклята сторінка — знайди картинку, яку ти давно відкладала й ніяк не наважувалась розфарбувати. Сьогодні саме вона стає твоїм геловінським завданням.','🐸 Перетворення — знайди персонажа, який у своєму мультфільмі змінював форму або був перетворений кимось.','💀 Безсмертний — знайди персонажа, який пов’язаний із потойбічним світом, смертю, привидами або світом духів.','🌹 Прокляття — знайди персонажа або сцену, пов’язану з прокляттям, закляттям.','😁 Зловісна посмішка — намалюй персонажа, у якого кріпова, зловісна посмішка.']},
-{id:'kris',name:'Кріс',photo:'admin-photos/kris.png',tasks:['🎃 Геловін уже близько… Не шукай конкретного предмета. Просто знайди одну картинку, яка, на твою думку, могла б стати ілюстрацією до геловінської казки. Це може бути щось моторошне, магічне, загадкове або навіть просто дуже атмосферне.','🧙‍♀️ Геловінський персонаж — знайди малюнок із відьмою, чаклуном або іншим персонажем, пов’язаним із магією.','🦹‍♀️ Головний лиходій — знайди малюнок із Disney-лиходієм, який чудово вписався б у Геловін. Це може бути Маліфісента, Урсула, Круелла, Зла Королева чи будь-який інший персонаж.','👗 Вбрання для таємничого вечора — знайди малюнок із незвичайною сукнею, костюмом, капелюхом, маскарадним вбранням або персонажем у святковому образі.','🍬 Солодка витівка — Геловін неможливо уявити без солодощів! Знайди малюнок, де є цукерки, тістечка, печиво або інші ласощі. Нехай це буде твоя солодка геловінська знахідка.']},
-{id:'anya',name:'Аня',photo:'admin-photos/anya.png',tasks:['🍄 Грибна галявина — Знайдіть картинку, на якій зображені гриби.','🏰 Таємничий замок — Знайдіть картинку із замком, палацом або фортецею.','🧸 Улюблена іграшка — Знайдіть картинку, на якій зображена іграшка або лялька.','🌹 Чарівна троянда — Знайдіть картинку, на якій зображена троянда або букет квітів.','🎈 Повітряні кульки — Знайдіть картинку, на якій є повітряні кульки.']}
-];
 
-const door=document.getElementById('door'), admin=document.getElementById('admin'), photo=document.getElementById('adminPhoto'), tap=document.getElementById('tap'), status=document.getElementById('status'), card=document.getElementById('card');
-let selected;
-const pick=a=>a[Math.floor(Math.random()*a.length)];
-tap.onclick=()=>{
-  tap.disabled=true; selected=pick(admins); photo.src=selected.photo; photo.alt='Фото '+selected.name;
-  status.textContent='👊 ТУК… ТУК… ТУК…'; door.classList.add('shake');
-  setTimeout(()=>{door.classList.remove('shake');door.classList.add('open');status.textContent='😈 Хтось відчиняє...'},650);
-  setTimeout(()=>{admin.classList.add('show');status.textContent='👻 Тебе зустрічає '+selected.name+'...'},1350);
-  setTimeout(()=>{document.getElementById('who').textContent='🎃 За дверима — '+selected.name+'!';document.getElementById('task').textContent=pick(selected.tasks);card.classList.add('show');status.textContent='✨ Завдання отримано!'},2450);
+<body>
+
+<div class="fog"></div>
+
+<main class="app">
+
+    <div class="header">
+        🎃 Halloween Challenge
+        <div class="sub">mini app</div>
+    </div>
+
+    <div class="scene">
+
+        <div class="frame">
+
+            <div class="wall"></div>
+
+            <div class="doorway">
+
+                <div class="glow"></div>
+
+                <div class="admin" id="admin">
+                    <img id="adminPhoto" alt="Фото адміна">
+                </div>
+
+                <div class="door" id="door">
+                    <div class="knob"></div>
+                </div>
+
+                <div class="nameBadge" id="nameBadge"></div>
+
+            </div>
+
+            <div class="spider s1">🕷️</div>
+            <div class="spider s2">🕸️</div>
+
+        </div>
+
+    </div>
+
+    <button class="tap" id="tap">
+        👊 ПОСТУКАТИ
+    </button>
+
+    <div class="status" id="status">
+        Навaжишся?
+    </div>
+
+</main>
+
+<div class="card" id="card">
+
+    <h2 id="who"></h2>
+
+    <div class="progress" id="progress"></div>
+
+    <div class="task" id="task"></div>
+
+    <button class="complete" id="complete">
+        ✅ ЗАВДАННЯ ВИКОНАНО
+    </button>
+
+    <button class="closeBtn" id="closeBtn">
+        Закрити
+    </button>
+
+</div>
+
+<script>
+
+/* ==========================================
+   TELEGRAM
+========================================== */
+
+const tg = window.Telegram?.WebApp;
+
+if (tg) {
+    tg.ready();
+    tg.expand();
+}
+
+
+/* ==========================================
+   ELEMENTS
+========================================== */
+
+const door = document.getElementById('door');
+const admin = document.getElementById('admin');
+const photo = document.getElementById('adminPhoto');
+
+const tap = document.getElementById('tap');
+const status = document.getElementById('status');
+
+const card = document.getElementById('card');
+const who = document.getElementById('who');
+const task = document.getElementById('task');
+
+const complete = document.getElementById('complete');
+const closeBtn = document.getElementById('closeBtn');
+
+const nameBadge = document.getElementById('nameBadge');
+const progress = document.getElementById('progress');
+
+
+/* ==========================================
+   STATE
+========================================== */
+
+let currentData = null;
+let loading = false;
+
+
+/* ==========================================
+   INIT DATA
+========================================== */
+
+function getInitData(){
+
+    if (!tg) {
+        return '';
+    }
+
+    return tg.initData || '';
+}
+
+
+/* ==========================================
+   API — GET TASK
+========================================== */
+
+async function getTask(){
+
+    const initData = getInitData();
+
+    if (!initData) {
+
+        status.textContent =
+            '⚠️ Відкрий Mini App через Telegram';
+
+        return null;
+    }
+
+    const response = await fetch('/api/task', {
+
+        method:'POST',
+
+        headers:{
+            'Content-Type':'application/json'
+        },
+
+        body:JSON.stringify({
+            initData
+        })
+
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.error || 'Помилка отримання завдання'
+        );
+
+    }
+
+    return data;
+}
+
+
+/* ==========================================
+   API — COMPLETE TASK
+========================================== */
+
+async function completeTask(){
+
+    const initData = getInitData();
+
+    const response = await fetch(
+        '/api/task/complete',
+        {
+
+            method:'POST',
+
+            headers:{
+                'Content-Type':'application/json'
+            },
+
+            body:JSON.stringify({
+                initData
+            })
+
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.error || 'Помилка'
+        );
+
+    }
+
+    return data;
+}
+
+
+/* ==========================================
+   SHOW ADMIN
+========================================== */
+
+function showAdmin(data){
+
+    currentData = data;
+
+    photo.src = data.admin.photo;
+    photo.alt = 'Фото ' + data.admin.name;
+
+    nameBadge.textContent =
+        '👻 ' + data.admin.name;
+
+    admin.classList.add('show');
+
+    setTimeout(() => {
+        nameBadge.classList.add('show');
+    },300);
+
+    setTimeout(() => {
+        nameBadge.classList.add('float');
+    },1500);
+}
+
+
+/* ==========================================
+   SHOW TASK CARD
+========================================== */
+
+function showTaskCard(data){
+
+    if (!data.task) {
+        showFinished(data);
+        return;
+    }
+
+    who.textContent =
+        '🎃 Завдання від ' + data.admin.name;
+
+    task.textContent =
+        data.task.text;
+
+    progress.textContent =
+        `Виконано: ${data.completedCount} / ${data.totalTasks}`;
+
+    complete.disabled = false;
+
+    card.classList.add('show');
+
+    status.textContent =
+        '✨ Завдання отримано!';
+}
+
+
+/* ==========================================
+   FINISH
+========================================== */
+
+function showFinished(data){
+
+    who.textContent =
+        '🎃 Геловінське завдання завершено!';
+
+    progress.textContent =
+        '5 / 5 виконано';
+
+    task.innerHTML = `
+        <div class="finish">
+            <div class="finishEmoji">🕯️👻🎃</div>
+
+            <div class="finishTitle">
+                Ти це зробила!
+            </div>
+
+            <div class="finishText">
+                Усі 5 завдань цього адміна виконано.
+                Час пишатися собою та чекати на нові пригоди! 🖤
+            </div>
+        </div>
+    `;
+
+    complete.style.display = 'none';
+
+    card.classList.add('show');
+
+    status.textContent =
+        '🎉 Усі завдання виконано!';
+}
+
+
+/* ==========================================
+   OPEN DOOR + SHOW TASK
+========================================== */
+
+async function openChallenge(){
+
+    if (loading) return;
+
+    loading = true;
+    tap.disabled = true;
+
+    status.textContent =
+        '👊 ТУК… ТУК… ТУК…';
+
+    door.classList.add('shake');
+
+    try {
+
+        const data = await getTask();
+
+        if (!data) {
+
+            loading = false;
+            tap.disabled = false;
+
+            return;
+        }
+
+        currentData = data;
+
+        setTimeout(() => {
+
+            door.classList.remove('shake');
+
+            door.classList.add('open');
+
+            status.textContent =
+                '😈 Хтось відчиняє...';
+
+        },650);
+
+        setTimeout(() => {
+
+            showAdmin(data);
+
+            status.textContent =
+                '👻 Тебе зустрічає ' +
+                data.admin.name +
+                '...';
+
+        },1350);
+
+        setTimeout(() => {
+
+            showTaskCard(data);
+
+            loading = false;
+
+        },2450);
+
+    } catch(error){
+
+        console.error(error);
+
+        status.textContent =
+            '⚠️ ' + error.message;
+
+        tap.disabled = false;
+        loading = false;
+    }
+}
+
+
+/* ==========================================
+   COMPLETE
+========================================== */
+
+async function handleComplete(){
+
+    if (loading) return;
+
+    loading = true;
+    complete.disabled = true;
+
+    status.textContent =
+        '🕯️ Перевіряємо завдання...';
+
+    try {
+
+        const data = await completeTask();
+
+        if (data.completed) {
+
+            currentData.completedCount =
+                data.completedCount;
+
+            showFinished({
+                ...currentData,
+                completedCount:data.completedCount,
+                totalTasks:data.totalTasks,
+                task:null
+            });
+
+            loading = false;
+
+            return;
+        }
+
+        // Нове завдання
+
+        currentData.task = data.task;
+        currentData.completedCount =
+            data.completedCount;
+
+        task.textContent =
+            data.task.text;
+
+        progress.textContent =
+            `Виконано: ${data.completedCount} / ${data.totalTasks}`;
+
+        complete.disabled = false;
+
+        status.textContent =
+            '✨ Нове завдання!';
+
+        // Легка анімація картки
+
+        card.classList.remove('show');
+
+        setTimeout(() => {
+            card.classList.add('show');
+        },100);
+
+        loading = false;
+
+    } catch(error){
+
+        console.error(error);
+
+        status.textContent =
+            '⚠️ ' + error.message;
+
+        complete.disabled = false;
+        loading = false;
+    }
+}
+
+
+/* ==========================================
+   EVENTS
+========================================== */
+
+tap.addEventListener(
+    'click',
+    openChallenge
+);
+
+complete.addEventListener(
+    'click',
+    handleComplete
+);
+
+closeBtn.addEventListener(
+    'click',
+    () => {
+
+        card.classList.remove('show');
+
+        status.textContent =
+            '✨ Завдання залишається за тобою';
+
+    }
+);
+
+
+/* ==========================================
+   PHOTO ERROR
+========================================== */
+
+photo.onerror = () => {
+
+    status.textContent =
+        '⚠️ Не знайдено фото адміна';
+
 };
-photo.onerror=()=>{status.textContent='⚠️ Не знайдено '+selected.photo;tap.disabled=false;};
+
+
+/* ==========================================
+   START
+========================================== */
+
 </script>
-</body></html>
+
+</body>
+</html>
