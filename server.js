@@ -1,7 +1,6 @@
 const express = require('express');
 const { Pool } = require('pg');
 const crypto = require('crypto');
-const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,7 +24,7 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 // ==========================================
-// Перевірка Telegram Mini App initData
+// Перевірка Telegram Mini App
 // ==========================================
 
 function validateTelegramInitData(initData) {
@@ -69,11 +68,15 @@ function validateTelegramInitData(initData) {
         return null;
     }
 
-    return JSON.parse(userData);
+    try {
+        return JSON.parse(userData);
+    } catch {
+        return null;
+    }
 }
 
 // ==========================================
-// Тест сервера
+// Перевірка сервера + БД
 // ==========================================
 
 app.get('/api/health', async (req, res) => {
@@ -86,7 +89,7 @@ app.get('/api/health', async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
+        console.error('DATABASE ERROR:', error);
 
         res.status(500).json({
             ok: false,
@@ -96,13 +99,11 @@ app.get('/api/health', async (req, res) => {
 });
 
 // ==========================================
-// Отримати завдання користувача
+// Отримати поточне завдання
 // ==========================================
 
 app.post('/api/task', async (req, res) => {
-
     try {
-
         const { initData } = req.body;
 
         const telegramUser = validateTelegramInitData(initData);
@@ -117,41 +118,47 @@ app.post('/api/task', async (req, res) => {
         const username = telegramUser.username || null;
 
         // ------------------------------------------
-        // Чи є вже цей користувач?
+        // Перевіряємо, чи користувач уже існує
         // ------------------------------------------
 
         const existingUser = await pool.query(
             `
             SELECT
-                users.id,
-                users.telegram_id,
-                users.username,
-                users.admin_id,
-                users.task_id,
-                admins.name AS admin_name,
-                admins.photo AS admin_photo,
-                tasks.task_text
-            FROM users
-            LEFT JOIN admins
-                ON admins.id = users.admin_id
-            LEFT JOIN tasks
-                ON tasks.id = users.task_id
-            WHERE users.telegram_id = $1
+                u.id,
+                u.telegram_id,
+                u.username,
+                u.admin_id,
+                u.task_id,
+                u.completed_tasks,
+                a.name AS admin_name,
+                a.photo AS admin_photo,
+                t.task_text
+            FROM users u
+            LEFT JOIN admins a
+                ON a.id = u.admin_id
+            LEFT JOIN tasks t
+                ON t.id = u.task_id
+            WHERE u.telegram_id = $1
             `,
             [telegramId]
         );
 
         // ------------------------------------------
-        // Користувач вже існує
+        // Користувач уже є
         // ------------------------------------------
 
         if (existingUser.rows.length > 0) {
-
             const user = existingUser.rows[0];
 
             return res.json({
                 existing: true,
-                completed: !user.task_id,
+
+                completed: user.task_id === null,
+
+                completedCount: user.completed_tasks.length,
+
+                totalTasks: 5,
+
                 admin: user.admin_id
                     ? {
                         id: user.admin_id,
@@ -159,6 +166,7 @@ app.post('/api/task', async (req, res) => {
                         photo: user.admin_photo
                     }
                     : null,
+
                 task: user.task_id
                     ? {
                         id: user.task_id,
@@ -169,7 +177,7 @@ app.post('/api/task', async (req, res) => {
         }
 
         // ------------------------------------------
-        // Новий користувач
+        // НОВИЙ КОРИСТУВАЧ
         // ------------------------------------------
 
         const adminsResult = await pool.query(
@@ -191,7 +199,7 @@ app.post('/api/task', async (req, res) => {
         const selectedAdmin = adminsResult.rows[0];
 
         // ------------------------------------------
-        // Вибираємо перше випадкове завдання
+        // Перше випадкове завдання
         // ------------------------------------------
 
         const taskResult = await pool.query(
@@ -224,9 +232,10 @@ app.post('/api/task', async (req, res) => {
                 telegram_id,
                 username,
                 admin_id,
-                task_id
+                task_id,
+                completed_tasks
             )
-            VALUES ($1, $2, $3, $4)
+            VALUES ($1, $2, $3, $4, '{}')
             `,
             [
                 telegramId,
@@ -237,17 +246,24 @@ app.post('/api/task', async (req, res) => {
         );
 
         // ------------------------------------------
-        // Відповідь
+        // Повертаємо адміна + завдання
         // ------------------------------------------
 
         res.json({
             existing: false,
+
             completed: false,
+
+            completedCount: 0,
+
+            totalTasks: 5,
+
             admin: {
                 id: selectedAdmin.id,
                 name: selectedAdmin.name,
                 photo: selectedAdmin.photo
             },
+
             task: {
                 id: selectedTask.id,
                 text: selectedTask.task_text
@@ -255,7 +271,6 @@ app.post('/api/task', async (req, res) => {
         });
 
     } catch (error) {
-
         console.error('TASK ERROR:', error);
 
         res.status(500).json({
@@ -264,15 +279,14 @@ app.post('/api/task', async (req, res) => {
     }
 });
 
-
 // ==========================================
-// Завдання виконано
+// ЗАВДАННЯ ВИКОНАНО
 // ==========================================
 
 app.post('/api/task/complete', async (req, res) => {
+    const client = await pool.connect();
 
     try {
-
         const { initData } = req.body;
 
         const telegramUser = validateTelegramInitData(initData);
@@ -285,29 +299,167 @@ app.post('/api/task/complete', async (req, res) => {
 
         const telegramId = telegramUser.id;
 
-        // Тут додамо логіку наступного завдання
-        // після того, як перевіримо підключення.
+        await client.query('BEGIN');
+
+        // ------------------------------------------
+        // Знаходимо користувача
+        // ------------------------------------------
+
+        const userResult = await client.query(
+            `
+            SELECT
+                id,
+                admin_id,
+                task_id,
+                completed_tasks
+            FROM users
+            WHERE telegram_id = $1
+            FOR UPDATE
+            `,
+            [telegramId]
+        );
+
+        if (userResult.rows.length === 0) {
+            await client.query('ROLLBACK');
+
+            return res.status(404).json({
+                error: 'Користувача не знайдено'
+            });
+        }
+
+        const user = userResult.rows[0];
+
+        // ------------------------------------------
+        // Якщо всі завдання вже виконані
+        // ------------------------------------------
+
+        if (user.task_id === null) {
+            await client.query('ROLLBACK');
+
+            return res.json({
+                completed: true,
+                completedCount: user.completed_tasks.length,
+                totalTasks: 5,
+                task: null
+            });
+        }
+
+        // ------------------------------------------
+        // Додаємо поточне завдання до виконаних
+        // ------------------------------------------
+
+        let completedTasks = Array.isArray(user.completed_tasks)
+            ? user.completed_tasks
+            : [];
+
+        if (!completedTasks.includes(user.task_id)) {
+            completedTasks.push(user.task_id);
+        }
+
+        // ------------------------------------------
+        // Шукаємо наступне НЕВИКОНАНЕ завдання
+        // ------------------------------------------
+
+        const nextTaskResult = await client.query(
+            `
+            SELECT id, task_text
+            FROM tasks
+            WHERE admin_id = $1
+              AND active = TRUE
+              AND NOT (id = ANY($2::integer[]))
+            ORDER BY RANDOM()
+            LIMIT 1
+            `,
+            [
+                user.admin_id,
+                completedTasks
+            ]
+        );
+
+        // ------------------------------------------
+        // Більше завдань немає
+        // ------------------------------------------
+
+        if (nextTaskResult.rows.length === 0) {
+
+            await client.query(
+                `
+                UPDATE users
+                SET
+                    task_id = NULL,
+                    completed_tasks = $1
+                WHERE id = $2
+                `,
+                [
+                    completedTasks,
+                    user.id
+                ]
+            );
+
+            await client.query('COMMIT');
+
+            return res.json({
+                completed: true,
+                completedCount: completedTasks.length,
+                totalTasks: 5,
+                task: null
+            });
+        }
+
+        // ------------------------------------------
+        // Є наступне завдання
+        // ------------------------------------------
+
+        const nextTask = nextTaskResult.rows[0];
+
+        await client.query(
+            `
+            UPDATE users
+            SET
+                task_id = $1,
+                completed_tasks = $2
+            WHERE id = $3
+            `,
+            [
+                nextTask.id,
+                completedTasks,
+                user.id
+            ]
+        );
+
+        await client.query('COMMIT');
 
         res.json({
-            ok: true,
-            message: 'Кнопка працює'
+            completed: false,
+            completedCount: completedTasks.length,
+            totalTasks: 5,
+            task: {
+                id: nextTask.id,
+                text: nextTask.task_text
+            }
         });
 
     } catch (error) {
 
-        console.error(error);
+        await client.query('ROLLBACK');
+
+        console.error('COMPLETE TASK ERROR:', error);
 
         res.status(500).json({
             error: 'Помилка сервера'
         });
+
+    } finally {
+        client.release();
     }
 });
 
-
 // ==========================================
-// Запуск
+// Запуск сервера
 // ==========================================
 
 app.listen(PORT, () => {
-    console.log(`Halloween Mini App server running on port ${PORT}`);
+    console.log(
+        `Halloween Mini App server running on port ${PORT}`
+    );
 });
